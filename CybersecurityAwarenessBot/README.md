@@ -153,6 +153,24 @@ The application includes a 12-question cybersecurity quiz. Each question provide
 
 The Activity Log records recent actions and interactions, including relevant chatbot activity and task actions. This provides a simple record of activity while the application is being used.
 
+## Testing
+
+The application was built successfully in Visual Studio using .NET 8.
+
+The following functionality was tested manually:
+
+- Chatbot responses to cybersecurity-related topics.
+- Task Assistant functionality.
+- Cybersecurity quiz and score display.
+- Activity Log updates and refresh functionality.
+- Voice greeting playback.
+- Loading tasks from the MySQL database.
+
+
+The Activity Log was tested by performing chatbot interactions and playing the voice greeting. The Refresh button successfully displayed the latest recorded activities.
+
+Testing was performed to confirm that the main application features work as expected in the local development environment.
+
 ## Version Control and CI
 
 The project is maintained using GitHub for version control. Meaningful commits were used to record development changes, and GitHub Actions is configured to build the solution automatically when repository changes are made.
