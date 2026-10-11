@@ -460,12 +460,18 @@ public partial class MainWindow : Window
         RefreshActivityLog();
     }
 
-    private void RefreshLog_Click(object sender, RoutedEventArgs e) => RefreshActivityLog();
 
     private void RefreshActivityLog()
     {
-        if (ActivityList == null || _activityLog == null) return;
-        ActivityList.ItemsSource = null;
+        if (_activityLog == null || ActivityList == null)
+            return;
+
         ActivityList.ItemsSource = _activityLog.GetRecent(10);
     }
+    private void RefreshLog_Click(object sender, RoutedEventArgs e)
+    {
+        RefreshActivityLog();
+    }
 }
+
+

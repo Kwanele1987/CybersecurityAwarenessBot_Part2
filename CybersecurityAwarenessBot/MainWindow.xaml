@@ -180,7 +180,9 @@
                             <DockPanel>
                                 <TextBlock Text="Recent Activity" FontSize="22" FontWeight="Bold"
                                            Foreground="#17324D"/>
-                                <Button DockPanel.Dock="Right" Content="Refresh" Click="RefreshLog_Click"/>
+                                <Button DockPanel.Dock="Right"
+        Content="Refresh"
+        Click="RefreshLog_Click"/>
                             </DockPanel>
                             <TextBlock Text="The application keeps the most recent actions concise and easy to review."
                                        Margin="0,5,0,12"/>

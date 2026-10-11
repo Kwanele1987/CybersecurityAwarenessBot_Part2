@@ -4,6 +4,10 @@ public class ChatbotService
 {
     private readonly Random _random = new();
 
+    private readonly KeywordResponder _keywordResponder = new();
+    private readonly MemoryStore _memory = new();
+    private readonly SentimentDetector _sentimentDetector = new();
+
     public string UserName { get; set; } = "Kwanele";
     public string FavouriteTopic { get; set; } = "Password Safety";
 
@@ -55,6 +59,62 @@ public class ChatbotService
     public string GetResponse(string input, string sentiment, out string intent)
     {
         string lower = input.ToLowerInvariant();
+
+        // Remember the current user details.
+        _memory.UserName = UserName;
+        _memory.FavouriteTopic = FavouriteTopic;
+
+        // Use the sentiment detector for consistent classification.
+        Sentiment detectedSentiment =
+            _sentimentDetector.DetectSentiment(input);
+
+        if (detectedSentiment != Sentiment.Neutral)
+        {
+            sentiment = detectedSentiment.ToString().ToLowerInvariant();
+        }
+
+        // Recall the user's name from session memory.
+        if (ContainsAny(lower,
+            "what is my name",
+            "what's my name",
+            "do you remember my name"))
+        {
+            intent = "memory";
+            return _memory.HasUserName
+                ? $"Your name is {_memory.UserName}. I remember it from our conversation."
+                : "You have not told me your name yet.";
+        }
+
+        // Recall the favourite topic from session memory.
+        if (ContainsAny(lower,
+            "what is my favourite topic",
+            "what is my favorite topic",
+            "what topic do i like"))
+        {
+            intent = "memory";
+            return _memory.HasFavouriteTopic
+                ? $"Your favourite cybersecurity topic is {_memory.FavouriteTopic}."
+                : "You have not told me your favourite topic yet.";
+        }
+
+        // Continue the last cybersecurity topic.
+        if (ContainsAny(lower,
+            "tell me more",
+            "another tip",
+            "what else",
+            "explain more"))
+        {
+            string previousTopic = _memory.CurrentTopic;
+
+            if (!string.IsNullOrWhiteSpace(previousTopic))
+            {
+                intent = previousTopic;
+                return ApplySentiment(
+                    _keywordResponder.GetRandomResponse(previousTopic),
+                    sentiment);
+            }
+        }
+
         if ((lower.Contains("worried") || lower.Contains("concerned") || lower.Contains("anxious"))
     && lower.Contains("security"))
         {
@@ -119,8 +179,15 @@ public class ChatbotService
             if (lower.Contains(topic, StringComparison.OrdinalIgnoreCase) ||
                 (topic == "browsing" && lower.Contains("browser", StringComparison.OrdinalIgnoreCase)))
             {
+
                 intent = topic;
-                return ApplySentiment(_responses[topic][_random.Next(_responses[topic].Count)], sentiment);
+                _memory.CurrentTopic = topic;
+
+                return ApplySentiment(
+                    _responses[topic][_random.Next(_responses[topic].Count)],
+                    sentiment);
+
+
             }
         }
         if (ContainsAny(lower, "what is my name", "what's my name", "do you remember my name"))
@@ -150,19 +217,37 @@ public class ChatbotService
         return $"Complete the cybersecurity task: {title}.";
     }
 
+
     private string FollowUpResponse()
     {
-        string[] topics = { "password", "phishing", "privacy", "browsing", "scam" };
-        string topic = FavouriteTopic switch
-        {
-            "Phishing" => "phishing",
-            "Privacy" => "privacy",
-            "Safe Browsing" => "browsing",
-            _ => topics[_random.Next(topics.Length)]
-        };
+        string topic = _memory.CurrentTopic;
 
-        return $"Since you are interested in {FavouriteTopic}, here is another point: {_responses[topic][_random.Next(_responses[topic].Count)]}";
+        // Use the favourite topic if no topic has been discussed yet.
+        if (string.IsNullOrWhiteSpace(topic))
+        {
+            topic = FavouriteTopic.ToLowerInvariant() switch
+            {
+                "phishing" => "phishing",
+                "privacy" => "privacy",
+                "safe browsing" => "browsing",
+                "password safety" => "password",
+                "scams" => "scam",
+                _ => "password"
+            };
+        }
+
+        // Make sure the topic exists in the response dictionary.
+        if (!_responses.ContainsKey(topic))
+        {
+            topic = "password";
+        }
+
+        string response =
+            _responses[topic][_random.Next(_responses[topic].Count)];
+
+        return $"Here is another tip about {topic}: {response}";
     }
+
 
     private static string ApplySentiment(string response, string sentiment)
     {
