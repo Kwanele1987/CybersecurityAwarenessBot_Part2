@@ -168,6 +168,6 @@ The project also contains version releases:
 The project includes a video demonstration showing the application running and explaining its main functionality and logic. The presentation uses the student's own recorded voice.
 Watch the demonstration of the Cybersecurity Awareness Assistant:
 
-Click here to watch the project presentation on YouTube
+Click here to watch the project presentation on https://www.youtube.com/watch?v=SwIqr6YrBX8
 
 The presentation demonstrates the application and its features.
